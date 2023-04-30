@@ -6,12 +6,12 @@ using UnityEngine.InputSystem;
 
 public class CubeElement : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler//, IPointerDownHandler
 {
-    private BoxCollider _collider;
-    private Vector3 _index;
+    [SerializeField] private float _offset = 2.05f;
+
+    [SerializeField] private Vector3 _index;
     private MeshRenderer _mesh;
 
     private bool _tempHighlighted;
-    private bool _highlighted;
 
     private ICubeHelper _helper;
 
@@ -20,16 +20,19 @@ public class CubeElement : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         _helper = helper;
 
         _mesh = GetComponent<MeshRenderer>();
-        _collider = GetComponent<BoxCollider>();
 
-        Vector3 position = transform.position;
+        Vector3 position = new Vector3(Mathf.Clamp(transform.position.x, -1, 1), Mathf.Clamp(transform.position.y, -1, 1), Mathf.Clamp(transform.position.z, -1, 1));
+        Debug.Log(transform.position + " " + position);
 
-        _index = position / 2.05f;
+        _index = new Vector3((int)position.x, (int)position.y, (int)position.z);
+    }
 
-        //if (_index.z != -1)
-        //{
-        //    _collider.enabled = false;
-        //}
+    public void RefreshIndex()
+    {
+        Vector3 position = new Vector3(Mathf.Clamp(transform.position.x, -1, 1), Mathf.Clamp(transform.position.y, -1, 1), Mathf.Clamp(transform.position.z, -1, 1));
+
+        _index = new Vector3((int)position.x, (int)position.y, (int)position.z);
+        _tempHighlighted = false;
     }
 
     public Vector3 GetIndex()
@@ -39,7 +42,6 @@ public class CubeElement : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void HighLight(bool active)
     {
-        _highlighted = active;
         _mesh.material.color = active ? Color.white : Color.black;
     }
 
@@ -51,20 +53,12 @@ public class CubeElement : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
         _tempHighlighted = true;
-
-        if (_highlighted)
-            return;
-
         _mesh.material.color = Color.white;
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
         _tempHighlighted = false;
-
-        if (_highlighted)
-            return;
-
         _mesh.material.color = Color.black;
     }
 }

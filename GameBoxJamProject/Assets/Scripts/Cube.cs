@@ -15,13 +15,10 @@ public class Cube : MonoBehaviour, ICubeHelper
     private List<CubeElement> _elements;
     private InputControl _input;
 
-    private bool _row;
-    private bool _highlighted;
-
     public void SetInput(InputControl input)
     {
         _input = input;
-        _input.ActionMap.Esc.performed += OnEscTap;
+        //_input.ActionMap.Esc.performed += OnEscTap;
         _input.ActionMap.Direction.started += MoveCube;
 
         _elements = GetComponentsInChildren<CubeElement>().ToList();
@@ -30,65 +27,16 @@ public class Cube : MonoBehaviour, ICubeHelper
         {
             element.Init(this);
         }
-
-        _row = true;
-        _highlighted = false;
     }
 
     public void HighLight(Vector3 index, bool highlighted)
     {
-        _highlighted = true;
-        if (!highlighted || _row)
-            HighLightRow(index);
-        else
-            HighLightColumn(index);
-    }
 
-    public void HighLightRow(Vector3 index)
-    {
-        ClearHighLight();
-
-        List<CubeElement> elements = _elements.FindAll(x => x.GetIndex().y == index.y);
-
-        foreach (CubeElement element in elements)
-        {
-            element.HighLight(true);
-        }
-
-        _row = false;
     }
 
     public InputControl GetInput()
     {
         return _input;
-    }
-
-    public void HighLightColumn(Vector3 index)
-    {
-        ClearHighLight();
-
-        List<CubeElement> elements = _elements.FindAll(x => x.GetIndex().x == index.x);
-
-        foreach (CubeElement element in elements)
-        {
-            element.HighLight(true);
-        }
-
-        _row = true;
-    }
-
-    private void ClearHighLight()
-    {
-        foreach (CubeElement element in _elements)
-        {
-            element.HighLight(false);
-        }
-    }
-
-    private void OnEscTap(InputAction.CallbackContext context)
-    {
-        ClearHighLight();
-        _highlighted = false;
     }
 
     private void MoveCube(InputAction.CallbackContext context)
@@ -99,11 +47,10 @@ public class Cube : MonoBehaviour, ICubeHelper
         if (element == null)
             return;
 
-        Vector2 index = element.GetIndex();
-        MoveInDirection(direction, index);
+        MoveInDirection(direction, element.GetIndex());
     }
 
-    private void MoveInDirection(Vector2 direction, Vector2 index)
+    private void MoveInDirection(Vector2 direction, Vector3 index)
     {
         switch (direction.x)
         {
@@ -112,24 +59,36 @@ public class Cube : MonoBehaviour, ICubeHelper
                     List<CubeElement> elements = _elements.FindAll(x => x.GetIndex().y == index.y);
                     CubeElement central = elements.Find(x => x.GetIndex().x == 0 && x.GetIndex().z == 0);
 
+                    if (elements == null || central == null)
+                        return;
+
                     foreach (CubeElement element in elements)
                     {
-                        element.transform.RotateAround(central.transform.position, Vector3.up, 90);
+                        element.gameObject.transform.RotateAround(central.gameObject.transform.position, Vector3.up, 90);
+
+                        element.RefreshIndex();
                     }
 
-                    break;
+                    return;
+                    //break;
                 }
             case 1:
                 {
                     List<CubeElement> elements = _elements.FindAll(x => x.GetIndex().y == index.y);
                     CubeElement central = elements.Find(x => x.GetIndex().x == 0 && x.GetIndex().z == 0);
 
+                    if (elements == null || central == null)
+                        return;
+
                     foreach (CubeElement element in elements)
                     {
-                        element.transform.RotateAround(central.transform.position, Vector3.up, -90);
+                        element.gameObject.transform.RotateAround(central.gameObject.transform.position, Vector3.down, 90);
+
+                        element.RefreshIndex();
                     }
 
-                    break;
+                    return;
+                    //break;
                 }
             default:
                 {
@@ -144,36 +103,41 @@ public class Cube : MonoBehaviour, ICubeHelper
                     List<CubeElement> elements = _elements.FindAll(x => x.GetIndex().x == index.x);
                     CubeElement central = elements.Find(x => x.GetIndex().y == 0 && x.GetIndex().z == 0);
 
+                    if (elements == null || central == null)
+                        return;
+
                     foreach (CubeElement element in elements)
                     {
-                        element.transform.RotateAround(central.transform.position, Vector3.left, 90);
+                        element.gameObject.transform.RotateAround(central.gameObject.transform.position, Vector3.left, 90);
+
+                        element.RefreshIndex();
                     }
 
-                    break;
+                    return;
+                    //break;
                 }
             case 1:
                 {
                     List<CubeElement> elements = _elements.FindAll(x => x.GetIndex().x == index.x);
                     CubeElement central = elements.Find(x => x.GetIndex().y == 0 && x.GetIndex().z == 0);
 
+                    if (elements == null || central == null)
+                        return;
+
                     foreach (CubeElement element in elements)
                     {
-                        element.transform.RotateAround(central.transform.position, Vector3.left, -90);
+                        element.gameObject.transform.RotateAround(central.gameObject.transform.position, Vector3.right, 90);
+
+                        element.RefreshIndex();
                     }
 
-                    break;
+                    return;
+                    //break;
                 }
             default:
                 {
                     break;
                 }
         }
-
-        ResetIndexes();
-    }
-
-    private void ResetIndexes()
-    {
-
     }
 }
